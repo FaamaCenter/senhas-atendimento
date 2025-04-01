@@ -43,21 +43,67 @@ function gerarSenha(categoria, preferencial = false) {
 }
 
 /**
- * Adiciona uma senha à fila de atendimento
+ * Adiciona uma senha à fila de atendimento mantendo:
+ * - Todas as preferenciais antes das normais
+ * - Ordem cronológica entre preferenciais
  * @param {string} senha - Senha a ser adicionada
  * @param {boolean} preferencial - Indica se é preferencial
  */
 function adicionarAFila(senha, preferencial) {
     if (preferencial) {
-        // Senhas preferenciais vão para o início da fila
-        filaSenhas.unshift(senha);
+        // Adiciona no final do bloco de preferenciais
+        let ultimaPreferencial = filaSenhas.findLastIndex(s => s.startsWith('P'));
+        filaSenhas.splice(ultimaPreferencial + 1, 0, senha);
     } else {
-        // Senhas normais vão para o final
+        // Senhas normais sempre no final
         filaSenhas.push(senha);
     }
-    
     atualizarInterface();
 }
+// ============== FUNÇÕES ATUALIZADAS ==============
+
+/**
+ * Encontra o índice da última senha preferencial na fila
+ * @returns {number} Índice da última preferencial ou -1 se não existir
+ */
+function encontrarIndiceUltimaPreferencial() {
+    for (let i = filaSenhas.length - 1; i >= 0; i--) {
+        if (filaSenhas[i].startsWith('P')) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+/**
+ * Versão otimizada da função anterior (para navegadores modernos)
+ */
+function encontrarIndiceUltimaPreferencial() {
+    return filaSenhas.findLastIndex(s => s.startsWith('P'));
+}
+
+/**
+ * Adiciona uma senha à fila mantendo a ordem correta
+ */
+function adicionarAFila(senha, preferencial) {
+    if (preferencial) {
+        const indiceInsercao = encontrarIndiceUltimaPreferencial() + 1;
+        filaSenhas.splice(indiceInsercao, 0, senha);
+    } else {
+        filaSenhas.push(senha);
+    }
+    atualizarInterface();
+}
+
+// ============== EXEMPLO DE USO ==============
+// Teste da nova implementação:
+filaSenhas = []; // Limpa a fila
+
+adicionarAFila('PF001', true);  // [PF001]
+adicionarAFila('S001', false);  // [PF001, S001]
+adicionarAFila('PF002', true);  // [PF001, PF002, S001]
+adicionarAFila('F001', false);  // [PF001, PF002, S001, F001]
+adicionarAFila('PF003', true);  // [PF001, PF002, PF003, S001, F001]
 
 /**
  * Chama a próxima senha da fila
