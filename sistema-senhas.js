@@ -1,17 +1,19 @@
-// ============== MODELO DE DADOS ==============
 let contadorSenhas = {
     financeiro: { normal: 0, preferencial: 0 },
     secretaria: { normal: 0, preferencial: 0 },
     filantropia: { normal: 0, preferencial: 0 }
 };
 
-let filaSenhas = [];
+let filasPorSegmento = {
+    financeiro: [],
+    secretaria: [],
+    filantropia: []
+};
 
 const painelEmissao = document.querySelector('.painel-emissao');
-const painelAtendimento = document.querySelector('.painel-atendimento');
 const painelSenha = document.querySelector('.painel-senha');
 
-// ============== FUNÇÕES PRINCIPAIS ==============
+// ====== Funções principais ======
 
 function gerarSenha(categoria, preferencial = false) {
     const tipo = preferencial ? 'preferencial' : 'normal';
@@ -27,40 +29,70 @@ function gerarSenha(categoria, preferencial = false) {
     }
 }
 
-function encontrarIndiceUltimaPreferencial() {
-    return filaSenhas.findLastIndex(s => s.startsWith('P'));
-}
+function adicionarAFila(categoria, senha, preferencial) {
+    const fila = filasPorSegmento[categoria];
 
-function adicionarAFila(senha, preferencial) {
     if (preferencial) {
-        const indice = encontrarIndiceUltimaPreferencial() + 1;
-        filaSenhas.splice(indice, 0, senha);
+        const indice = fila.findLastIndex(s => s.startsWith('P')) + 1;
+        fila.splice(indice, 0, senha);
     } else {
-        filaSenhas.push(senha);
+        fila.push(senha);
     }
+
+    salvarEstadoLocal();
     atualizarInterface();
 }
 
-// ✅ REMOVE da fila e salva imediatamente o novo estado
-function chamarProximaSenha() {
-    if (filaSenhas.length === 0) {
-        alert('Não há senhas na fila!');
+function emitirSenha(categoria, preferencial) {
+    const senha = gerarSenha(categoria, preferencial);
+    adicionarAFila(categoria, senha, preferencial);
+    alert(`Senha emitida: ${senha}`);
+
+    if (painelSenha) {
+        painelSenha.innerHTML = `
+            <h2>Senha Emitida</h2>
+            <div class="senha">${senha}</div>
+        `;
+    }
+}
+
+// ====== Atendimento ======
+
+function chamarProximaSenha(categoria) {
+    const fila = filasPorSegmento[categoria];
+
+    if (fila.length === 0) {
+        alert(`Não há senhas na fila de ${categoria}`);
         return;
     }
 
-    const senhaAtual = filaSenhas.shift();
+    const senhaAtual = fila.shift();
+
+    localStorage.setItem(`senhaChamadaAtual_${categoria}`, senhaAtual);
+    localStorage.setItem(`senhaChamadaData_${categoria}`, Date.now());
+    
+
     exibirSenhaAtual(senhaAtual);
 
-    salvarEstadoLocal(); // <<< Aqui é o que garante que a fila atual seja salva
+    const audio = new Audio('ding.mp3');
+    audio.play();
+
+    salvarEstadoLocal();
     atualizarInterface();
 }
 
+function exibirSenhaAtual(senha) {
+    console.log(`Senha atual: ${senha}`);
+}
 
-// ============== INTERFACE ==============
+// ====== Interface ======
 
 function atualizarInterface() {
     renderizarBotoesEmissao();
-    renderizarPainelAtendimento();
+
+    if (document.getElementById('painel-container')) {
+        renderizarPainelAtendimentoTodos();
+    }
 }
 
 function renderizarBotoesEmissao() {
@@ -85,47 +117,36 @@ function renderizarBotoesEmissao() {
     `;
 }
 
-function renderizarPainelAtendimento() {
-    if (!painelAtendimento) return;
-    painelAtendimento.innerHTML = `
-        <h2>Painel de Atendimento</h2>
-        <div class="senha-atual">${filaSenhas[0] || '---'}</div>
-        <button onclick="chamarProximaSenha()">Chamar Próxima</button>
-        <h3>Próximas senhas:</h3>
-        <ul>
-            ${filaSenhas.slice(1, 6).map(s => `<li>${s}</li>`).join('')}
-        </ul>
-        <button onclick="resetarSistema()" style="background-color: red; color: white; margin-top: 20px;">
-            🔁 Resetar Sistema
-        </button>
-    `;
-}
+function renderizarPainelAtendimentoTodos() {
+    const container = document.getElementById('painel-container');
+    if (!container) return;
 
-function exibirSenhaAtual(senha) {
-    console.log(`Senha atual: ${senha}`);
-}
+    container.innerHTML = ['financeiro', 'secretaria', 'filantropia'].map(categoria => {
+        const fila = filasPorSegmento[categoria];
+        const senhaChamada = localStorage.getItem(`senhaChamadaAtual_${categoria}`) || '---';
 
-function emitirSenha(categoria, preferencial) {
-    const senha = gerarSenha(categoria, preferencial);
-    adicionarAFila(senha, preferencial);
-    alert(`Senha emitida: ${senha}`);
-
-    if (painelSenha) {
-        painelSenha.innerHTML = `
-            <h2>Senha Emitida</h2>
-            <div class="senha">${senha}</div>
+        return `
+            <div class="painel-setor">
+                <h2>${categoria.toUpperCase()}</h2>
+                <div class="senha-atual">${senhaChamada}</div>
+                <button onclick="chamarProximaSenha('${categoria}')">Chamar Próxima</button>
+                <h4>Próximas:</h4>
+                <ul>
+                    ${fila.slice(0, 5).map(s => `<li>${s}</li>`).join('')}
+                </ul>
+                <button onclick="resetarSistema()" style="background-color: red; color: white; margin-top: 10px;">
+                    Resetar
+                </button>
+            </div>
         `;
-    }
-
-    salvarEstadoLocal(); // <<< Aqui também!
+    }).join('');
 }
 
-
-// ============== LOCAL STORAGE ==============
+// ====== LocalStorage ======
 
 function salvarEstadoLocal() {
     localStorage.setItem('contadorSenhas', JSON.stringify(contadorSenhas));
-    localStorage.setItem('filaSenhas', JSON.stringify(filaSenhas));
+    localStorage.setItem('filasPorSegmento', JSON.stringify(filasPorSegmento));
     const hoje = new Date().toISOString().split('T')[0];
     localStorage.setItem('dataUltimaExecucao', hoje);
 }
@@ -135,58 +156,59 @@ function carregarEstadoLocal() {
     const ultimaData = localStorage.getItem('dataUltimaExecucao');
 
     if (ultimaData !== hoje) {
-        localStorage.removeItem('filaSenhas');
         localStorage.removeItem('contadorSenhas');
+        localStorage.removeItem('filasPorSegmento');
+        ['financeiro', 'secretaria', 'filantropia'].forEach(c => {
+            localStorage.removeItem(`senhaChamadaAtual_${c}`);
+        });
         localStorage.setItem('dataUltimaExecucao', hoje);
         return;
     }
 
     const contador = localStorage.getItem('contadorSenhas');
-    const fila = localStorage.getItem('filaSenhas');
+    const filas = localStorage.getItem('filasPorSegmento');
 
-    if (contador) {
-        const dados = JSON.parse(contador);
-        for (const categoria in dados) {
-            if (contadorSenhas[categoria]) {
-                contadorSenhas[categoria] = dados[categoria];
-            }
-        }
-    }
-
-    if (fila) {
-        filaSenhas = JSON.parse(fila);
-    }
+    if (contador) contadorSenhas = JSON.parse(contador);
+    if (filas) filasPorSegmento = JSON.parse(filas);
 }
 
-// ============== RESET MANUAL ==============
+// ====== Reset Manual ======
 
 function resetarSistema() {
-    if (confirm('Tem certeza que deseja resetar a fila e os contadores?')) {
-        filaSenhas = [];
+    if (confirm('Tem certeza que deseja resetar tudo?')) {
         contadorSenhas = {
             financeiro: { normal: 0, preferencial: 0 },
             secretaria: { normal: 0, preferencial: 0 },
             filantropia: { normal: 0, preferencial: 0 }
         };
+        filasPorSegmento = {
+            financeiro: [],
+            secretaria: [],
+            filantropia: []
+        };
         localStorage.clear();
         atualizarInterface();
-        alert('Sistema resetado com sucesso!');
+        alert('Sistema resetado.');
     }
 }
 
-// ============== INICIALIZAÇÃO ==============
+// ====== Sincronização entre abas ======
+
+window.addEventListener('storage', function (event) {
+    if (
+        ['contadorSenhas', 'filasPorSegmento',
+         'senhaChamadaAtual_financeiro',
+         'senhaChamadaAtual_secretaria',
+         'senhaChamadaAtual_filantropia'].includes(event.key)
+    ) {
+        carregarEstadoLocal();
+        atualizarInterface();
+    }
+});
+
+// ====== Inicialização ======
 
 document.addEventListener('DOMContentLoaded', () => {
     carregarEstadoLocal();
     atualizarInterface();
-});
-
-// ============== SINCRONIZAÇÃO ENTRE ABAS ==============
-
-window.addEventListener('storage', function (event) {
-    if (['filaSenhas', 'contadorSenhas'].includes(event.key)) {
-        console.log(`[Sync] Atualização recebida de outra aba: ${event.key}`);
-        carregarEstadoLocal();
-        atualizarInterface();
-    }
 });

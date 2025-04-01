@@ -1,37 +1,60 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Atendimento</title>
-    <style>
-        .painel-atendimento {
-            padding: 20px;
-            margin: 10px;
-            border: 1px solid #ccc;
-        }
-        .senha-atual {
-            font-size: 2.2em;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        button {
-            margin: 10px 0;
-            padding: 10px 20px;
-            font-size: 16px;
-        }
-        ul {
-            list-style: none;
-            padding-left: 0;
-        }
-        li {
-            font-size: 1.2em;
-            margin-bottom: 5px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Painel de Atendimento - Todos os Segmentos</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+
+    .painel-setor {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 15px;
+      width: 300px;
+      display: inline-block;
+      vertical-align: top;
+      background-color: #f9f9f9;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .painel-setor h2 {
+      margin-top: 0;
+      text-transform: uppercase;
+    }
+
+    .senha-atual {
+      font-size: 2.2em;
+      font-weight: bold;
+      margin: 15px 0;
+      color: #007bff;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 10px 0;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      font-size: 1.2em;
+      margin-bottom: 5px;
+    }
+  </style>
 </head>
 <body>
-    <h1>Painel de Atendimento</h1>
-    <div class="painel-atendimento"></div>
-    <script src="sistema-senhas.js" defer></script>
+  <h1>Painel de Atendimento</h1>
+  <div id="painel-container"></div>
+
+  <script src="sistema-senhas.js" defer></script>
 </body>
 </html>

@@ -1,36 +1,75 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Emissão de Senhas</title>
-    <style>
-        .painel-emissao, .painel-senha {
-            padding: 20px;
-            margin: 10px;
-            border: 1px solid #ccc;
-        }
-        button {
-            margin: 5px;
-            padding: 10px 20px;
-            font-size: 16px;
-        }
-        .painel-senha {
-            border: 2px dashed #007bff;
-            background-color: #f0f8ff;
-            text-align: center;
-        }
-        .painel-senha .senha {
-            font-size: 2.5em;
-            font-weight: bold;
-            color: #007bff;
-            margin-top: 10px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Emissão de Senhas</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 30px;
+    }
+
+    .painel-emissao {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+
+    .categoria {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 20px;
+      width: 250px;
+      background-color: #f5f5f5;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .categoria h3 {
+      margin-top: 0;
+    }
+
+    button {
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .painel-senha {
+      margin-top: 20px;
+      border: 2px dashed #007bff;
+      background-color: #eef7ff;
+      padding: 20px;
+      border-radius: 10px;
+      display: inline-block;
+    }
+
+    .painel-senha h2 {
+      margin: 0;
+      color: #007bff;
+    }
+
+    .painel-senha .senha {
+      font-size: 2.5em;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
-    <h1>Emissão de Senhas</h1>
-    <div class="painel-emissao"></div>
-    <div class="painel-senha"></div>
-    <script src="sistema-senhas.js"></script>
+  <h1>Emissão de Senhas</h1>
+
+  <div class="painel-emissao"></div>
+  <div class="painel-senha"></div>
+
+  <script src="sistema-senhas.js" defer></script>
 </body>
 </html>

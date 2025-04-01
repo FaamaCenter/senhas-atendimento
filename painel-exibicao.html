@@ -1,44 +1,86 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Senha Atual</title>
-    <style>
-        body {
-            background-color: #000;
-            color: #fff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            font-family: Arial, sans-serif;
-        }
-        .senha-grande {
-            font-size: 8em;
-            font-weight: bold;
-            color: #00ffcc;
-        }
-        .atualizando {
-            font-size: 1.5em;
-            margin-top: 20px;
-            color: #888;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <title>Painel de Exibição</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      color: #222;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .senha {
+      font-size: 6rem;
+      font-weight: bold;
+      margin: 20px 0;
+      padding: 20px 60px;
+      border: 4px solid #007bff;
+      border-radius: 10px;
+      background-color: #fff;
+    }
+
+    .segmento {
+      font-size: 1.5rem;
+      color: #555;
+    }
+  </style>
 </head>
 <body>
-    <div class="senha-grande" id="senhaAtual">---</div>
-    <div class="atualizando">Aguardando próxima senha...</div>
+  <h1>Painel de Atendimento</h1>
+  <div class="senha" id="senhaAtual">---</div>
+  <div class="segmento" id="segmentoAtual">---</div>
 
-    <script>
-        function atualizarSenha() {
-            const fila = JSON.parse(localStorage.getItem('filaSenhas')) || [];
-            document.getElementById('senhaAtual').textContent = fila[0] || '---';
+  <script>
+    const nomes = {
+      financeiro: "Financeiro",
+      secretaria: "Secretaria",
+      filantropia: "Filantropia"
+    };
+
+    function obterUltimaSenhaChamada() {
+      const segmentos = ['financeiro', 'secretaria', 'filantropia'];
+      let ultimaSenha = null;
+      let segmentoDaSenha = null;
+      let ultimaData = 0;
+
+      for (const segmento of segmentos) {
+        const senha = localStorage.getItem(`senhaChamadaAtual_${segmento}`);
+        const data = localStorage.getItem(`senhaChamadaData_${segmento}`);
+
+        if (senha && data && Number(data) > ultimaData) {
+          ultimaSenha = senha;
+          segmentoDaSenha = segmento;
+          ultimaData = Number(data);
         }
+      }
 
-        setInterval(atualizarSenha, 1000);
-        atualizarSenha();
-    </script>
+      return {
+        senha: ultimaSenha || '---',
+        segmento: nomes[segmentoDaSenha] || '---'
+      };
+    }
+
+    function atualizarPainel() {
+      const info = obterUltimaSenhaChamada();
+      document.getElementById("senhaAtual").textContent = info.senha;
+      document.getElementById("segmentoAtual").textContent = info.segmento;
+    }
+
+    // Atualiza quando qualquer senha for chamada
+    window.addEventListener("storage", atualizarPainel);
+    atualizarPainel();
+  </script>
 </body>
 </html>
