@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Senha Atual</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .senha-grande {
+            font-size: 8em;
+            font-weight: bold;
+            color: #00ffcc;
+        }
+        .atualizando {
+            font-size: 1.5em;
+            margin-top: 20px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="senha-grande" id="senhaAtual">---</div>
+    <div class="atualizando">Aguardando próxima senha...</div>
+
+    <script>
+        function atualizarSenha() {
+            const fila = JSON.parse(localStorage.getItem('filaSenhas')) || [];
+            document.getElementById('senhaAtual').textContent = fila[0] || '---';
+        }
+
+        setInterval(atualizarSenha, 1000);
+        atualizarSenha();
+    </script>
+</body>
+</html>
