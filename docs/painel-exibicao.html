@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Painel de Exibição</title>
+  <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      color: #222;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .senha {
+      font-size: 6rem;
+      font-weight: bold;
+      margin: 20px 0;
+      padding: 20px 60px;
+      border: 4px solid #007bff;
+      border-radius: 10px;
+      background-color: #fff;
+    }
+
+    .segmento {
+      font-size: 1.5rem;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h1>Painel de Atendimento</h1>
+  <div class="senha" id="senhaAtual">---</div>
+  <div class="segmento" id="segmentoAtual">---</div>
+
+  <script>
+    const nomesSegmentos = {
+      financeiro: "Financeiro",
+      secretaria: "Secretaria",
+      filantropia: "Filantropia"
+    };
+  
+    const socket = io('http://localhost:3000');
+  
+    socket.on('senhaChamada', ({ categoria, senhaAtual }) => {
+      document.getElementById('senhaAtual').textContent = senhaAtual;
+      document.getElementById('segmentoAtual').textContent = nomesSegmentos[categoria];
+      new Audio('som.mp3').play();
+    });
+  
+    socket.on('reset', () => {
+      document.getElementById('senhaAtual').textContent = '---';
+      document.getElementById('segmentoAtual').textContent = '---';
+    });
+  
+    socket.on('connect', () => console.log('Conectado ao backend.'));
+    socket.on('disconnect', () => console.log('Desconectado do backend.'));
+  </script>
+  
+</body>
+</html>

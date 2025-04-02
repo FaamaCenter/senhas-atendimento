@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Emissão de Senhas</title>
+  <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 30px;
+    }
+
+    .painel-emissao {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+
+    .categoria {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 20px;
+      width: 250px;
+      background-color: #f5f5f5;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .categoria h3 {
+      margin-top: 0;
+    }
+
+    button {
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .painel-senha {
+      margin-top: 20px;
+      border: 2px dashed #007bff;
+      background-color: #eef7ff;
+      padding: 20px;
+      border-radius: 10px;
+      display: inline-block;
+    }
+
+    .painel-senha h2 {
+      margin: 0;
+      color: #007bff;
+    }
+
+    .painel-senha .senha {
+      font-size: 2.5em;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Emissão de Senhas</h1>
+
+<div class="painel-emissao">
+  <div class="categoria">
+    <h3>Financeiro</h3>
+    <button onclick="emitirSenha('financeiro', false)">Normal</button>
+    <button onclick="emitirSenha('financeiro', true)">Preferencial</button>
+  </div>
+  <div class="categoria">
+    <h3>Secretaria</h3>
+    <button onclick="emitirSenha('secretaria', false)">Normal</button>
+    <button onclick="emitirSenha('secretaria', true)">Preferencial</button>
+  </div>
+  <div class="categoria">
+    <h3>Filantropia</h3>
+    <button onclick="emitirSenha('filantropia', false)">Normal</button>
+    <button onclick="emitirSenha('filantropia', true)">Preferencial</button>
+  </div>
+</div>
+
+<div class="painel-senha" id="senhaEmitida">
+  <h2>Senha Emitida</h2>
+  <div class="senha">---</div>
+</div>
+
+  <script>
+  const socket = io('http://localhost:3000');
+
+  function emitirSenha(categoria, preferencial) {
+    socket.emit('emitirSenha', { categoria, preferencial });
+  }
+
+  socket.on('senhaEmitida', (senha) => {
+    document.getElementById('senhaEmitida').innerHTML = `
+      <h2>Senha Emitida</h2>
+      <div class="senha">${senha}</div>
+    `;
+  });
+
+  socket.on('connect', () => {
+    console.log('Conectado ao servidor');
+  });
+
+  socket.on('disconnect', () => {
+    console.log('Desconectado do servidor');
+  });
+</script>
+
+</body>
+</html>

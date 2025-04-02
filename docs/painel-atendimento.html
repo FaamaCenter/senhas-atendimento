@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Painel de Atendimento - Todos os Segmentos</title>
+  <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+
+    .painel-setor {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 15px;
+      width: 300px;
+      display: inline-block;
+      vertical-align: top;
+      background-color: #f9f9f9;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .painel-setor h2 {
+      margin-top: 0;
+      text-transform: uppercase;
+    }
+
+    .senha-atual {
+      font-size: 2.2em;
+      font-weight: bold;
+      margin: 15px 0;
+      color: #007bff;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 10px 0;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      font-size: 1.2em;
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Painel de Atendimento</h1>
+  
+  <div id="painel-container"></div>
+
+  <!-- Botão reset centralizado no rodapé -->
+  <div style="
+    position: fixed;
+    bottom: 15px;
+    width: 100%;
+    text-align: center;
+  ">
+    <button onclick="resetarSistema()" style="
+      padding: 6px 12px;
+      font-size: 0.9em;
+      cursor: pointer;
+      border: none;
+      border-radius: 4px;
+      background-color: #ccc;
+      color: #444;
+    ">
+      Resetar Sistema
+    </button>
+  </div>
+
+  <script>
+    const socket = io('http://localhost:3000');
+
+    let filasPorSegmento = {};
+    let senhaAtualPorSegmento = {};
+
+    function chamarProximaSenha(categoria) {
+      socket.emit('chamarProximaSenha', { categoria });
+    }
+
+    function resetarSistema() {
+      if (confirm('Tem certeza que deseja resetar tudo?')) {
+        socket.emit('resetarSistema');
+      }
+    }
+
+    function renderizarPainel() {
+      const container = document.getElementById('painel-container');
+      container.innerHTML = ['financeiro', 'secretaria', 'filantropia'].map(categoria => {
+        const senhaAtual = senhaAtualPorSegmento[categoria] || '---';
+        const fila = filasPorSegmento[categoria] || [];
+
+        return `
+          <div class="painel-setor">
+            <h2>${categoria.toUpperCase()}</h2>
+            <div class="senha-atual">${senhaAtual}</div>
+            <button onclick="chamarProximaSenha('${categoria}')">Chamar Próxima</button>
+            <h4>Próximas:</h4>
+            <ul>
+              ${fila.slice(0, 5).map(s => `<li>${s}</li>`).join('')}
+            </ul>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Eventos Socket.io
+    socket.on('estadoInicial', (dados) => {
+      filasPorSegmento = dados.filasPorSegmento;
+      renderizarPainel();
+    });
+
+    socket.on('atualizarFilas', (dados) => {
+      filasPorSegmento = dados.filasPorSegmento;
+      renderizarPainel();
+    });
+
+    socket.on('senhaChamada', ({ categoria, senhaAtual }) => {
+      senhaAtualPorSegmento[categoria] = senhaAtual;
+      renderizarPainel();
+    });
+
+    socket.on('reset', () => {
+      senhaAtualPorSegmento = {};
+      renderizarPainel();
+    });
+
+    socket.on('connect', () => console.log('Conectado ao backend.'));
+    socket.on('disconnect', () => console.log('Desconectado do backend.'));
+  </script>
+</body>
+</html>
